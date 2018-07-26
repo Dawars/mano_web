@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script data-cfasync="false" async src="https://www.googletagmanager.com/gtag/js?id=UA-78858800-1"></script>
+    <script data-cfasync="false">
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'UA-78858800-1');
+    </script>
+
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:creator" content="@dawars00"/>
+
+    <meta property="og:url" content="https://dawars.me/mano"/>
+    <meta property="og:title" content="Deformable Hand Model - Interactive Demo"/>
+    <meta property="og:description" content="Change the hand's shape with 10 simple parameters."/>
+    <meta property="og:image" content="https://dawars.me/mano/images/banner.png"/>
+
+    <meta name="description" content="Change the hand's shape with 10 simple parameters.">
+    <meta itemprop="name" content="Deformable Hand Model - Interactive Demo">
+    <meta itemprop="description" content="Change the hand's shape with 10 simple parameters.">
+    <meta itemprop="image" content="https://dawars.me/mano/images/banner.png">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            color: #eee;
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 13px;
+            margin: 0;
+            overflow: hidden;
+            line-height: 1.4em;
+            text-shadow: 0 -1px 0 rgba(0, 0, 0, .5);
+            background-color: #000;
+            width: 100%;
+            height: 100%;
+        }
+
+        #options {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+        }
+
+        #options ul {
+            list-style-type: none;
+        }
+
+        a {
+            color: white;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, .5)
+        }
+
+        #container canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+        }
+
+        #loading {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            padding: 10px;
+            color: white;
+            background-color: #b70000;
+            text-align: center;
+            pointer-events: none;
+            -webkit-transition: opacity 250ms ease-out;
+            opacity: 0;
+        }
+
+        #intro {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+        }
+
+        #intro p {
+            margin-top: .7em;
+        }
+
+        @media (max-width: 600px) {
+            #options {
+                display: none;
+            }
+        }
+        @media (max-width: 1000px) {
+            #options {
+                display: none;
+            }
+        }
+    </style>
+
+
+    <title>Deformable Hand Model - Interactive Demo</title>
+</head>
+<body>
+<div id="fb-root"></div>
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = 'https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v3.0&appId=245091309216121&autoLogAppEvents=1';
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<div id="loading">Loading...</div>
+<div id="options">
+    <p><b>Deformable Hand Model</b> | Adjust the sliders on the right side to change the shape.</p>
+</div>
+<div id="intro">
+    <p><b>Deformable Hand Model</b></p>
+    <p>Check out our article detailing the project at <a
+            href="https://medium.com/@Dawars/personalized-hand-model-for-games-bdf6d6f8fad3">Medium</a>.</p>
+
+    <p>The web app is written in C++ and compiled to WebAssembly for performance reasons.</p>
+
+    <p>The hand model is based on the <a href="http://mano.is.tue.mpg.de/" target="_blank">Mano model</a> which is the
+        property of the Max Planck Gesellschaft. </p>
+    <p>Code by Dávid Komorowicz <a href="http://www.twitter.com/dawars00" rel="external" target="_blank">@dawars00</a>
+        and Vince Szabó using <a href="http://www.threejs.org" rel="external" target="_blank">three.js</a>.</p>
+    <br/>
+    <a href="https://twitter.com/share" class="twitter-share-button" data-via="dawars00" data-lang="en">Tweet</a>
+    <script>!function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (!d.getElementById(id)) {
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }
+    }(document, "script", "twitter-wjs");</script>
+
+    <div class="fb-share-button" data-href="https://dawars.me/mano/" data-layout="button_count" data-size="small"
+         data-mobile-iframe="true"><a target="_blank"
+                                      href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdawars.me%2Fmano%2F&amp;src=sdkpreparse"
+                                      class="fb-xfbml-parse-ignore">Share</a></div>
+    <script src="js/three.min.js"></script>
+    <script src="js/Detector.js"></script>
+    <!--<script src="js/libs/stats.min.js"></script>-->
+    <script src="js/libs/dat.gui.min.js"></script>
+    <script src="js/controls/OrbitControls.min.js"></script>
+    <script data-cfasync="false" async src="mano_cpp.min.js"></script>
+    <script>
+
+        // init without WASM
+        let SCREEN_WIDTH = window.innerWidth;
+        let SCREEN_HEIGHT = window.innerHeight;
+        let container, stats, controls;
+        let camera, scene, renderer;
+
+        let clock = new THREE.Clock();
+
+        let gui, manoParams;
+
+
+        if (!Detector.webgl) Detector.addGetWebGLMessage();
+
+        container = document.createElement('div');
+        document.body.appendChild(container);
+
+        camera = new THREE.PerspectiveCamera(40, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 1000);
+        camera.position.y = 110;
+        camera.zoom = 2;
+        camera.updateProjectionMatrix();
+
+        // renderer
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        container.appendChild(renderer.domElement);
+
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050505);
+
+
+        // materials
+        let material = new THREE.MeshStandardMaterial({
+            color: 0xff5500,
+            flatShading: true,
+            side: THREE.DoubleSide,
+            skinning: true
+        });
+
+        // lights
+        let ambientLight = new THREE.AmbientLight(0x222222);
+        scene.add(ambientLight);
+        let light1 = new THREE.DirectionalLight(0xffffff, 0.5);
+        light1.position.set(1, -1, 1);
+        scene.add(light1);
+        let light2 = new THREE.DirectionalLight(0xffffff, 1);
+        light2.position.set(0, 1, 0);
+        scene.add(light2);
+
+        window.onload = function () {
+            ManoModule().then(initModule);
+        };
+
+        let Mano = {};
+
+        let shapeParams = new Float32Array(10);
+        let numVertices;
+        let numJoints;
+        let vertData, indexBuffer;
+        let weightIndexBuffer, weightsBuffer;
+        let handGeom;
+        let vertBufferPtr = 0; // mano verts
+        let shapePPtr = 0;
+        let posePPtr = 0;
+        let vertBufferSize;
+        let jointLoc, jointRot;
+
+        let handMesh;
+
+        function initModule(Module) {
+            // wrap functions to Mano and call init
+
+            Mano.getNumVertices = Module.cwrap("getNumVertices", ["number"], []);
+            // Mano.getNumJoints = Module.cwrap("getNumJoints", ["number"], []);
+            Mano.getNumPoseParams = Module.cwrap("getNumPoseParams", ["number"], []);
+
+            Mano.calcHandVertices = Module.cwrap('calcHandVertices', null, ['number', 'number', 'number']);
+
+            Mano.getIndexBuffer = Module.cwrap("getIndexBuffer", ["number"], []);
+            Mano.getIndexBufferSize = Module.cwrap("getIndexBufferSize", ["number"], []);
+
+            // Mano.getWeightIndices = Module.cwrap("getWeightIndices", ["number"], []);
+            // Mano.getBlendWeights = Module.cwrap("getBlendWeights", ["number"], []);
+            // Mano.getJointLocations = Module.cwrap("getJointLocations",["number"],[]);
+            // Mano.getJointRotation = Module.cwrap("getJointRotation",["number"],[]);
+
+            Mano.malloc = Module._malloc;
+            Mano.free = Module._free;
+
+            //This will clean things up once we exit
+            window.onbeforeunload = () => {
+                Mano.free(shapePPtr);
+                Mano.free(vertBufferPtr);
+                Mano.free(posePPtr);
+            };
+
+            // data from wasm heap
+            let vertHeap;
+            let shapeHeap;
+
+
+            // mano params
+            initGui();
+
+            loadParams();
+
+            createScene();
+
+            refreshGeometry(handGeom);
+            draw();
+
+
+            /**
+             * Call WASM functions and save buffers to global variables
+             * */
+            function loadParams() {
+                let shapePSize = shapeParams.length * shapeParams.BYTES_PER_ELEMENT;
+                shapePPtr = Mano.malloc(shapePSize);
+                shapeHeap = new Uint8Array(Module.HEAPU8.buffer, shapePPtr, shapePSize); // we need to write to this
+
+                //The vertex coordinates
+                numVertices = Mano.getNumVertices();
+
+                vertData = new Float32Array(numVertices * 3);
+                vertBufferSize = vertData.length * vertData.BYTES_PER_ELEMENT;
+                vertBufferPtr = Mano.malloc(vertBufferSize);
+
+
+                Mano.calcHandVertices(vertBufferPtr, shapePPtr, posePPtr);
+
+                vertHeap = new Uint8Array(Module.HEAPU8.buffer, vertBufferPtr, vertBufferSize); // get region from wasm heap
+                vertData = new Float32Array(vertHeap.buffer, vertHeap.byteOffset, numVertices * 3);
+
+                // index buffer
+                let indexPtr = Mano.getIndexBuffer();
+                let indexSize = Mano.getIndexBufferSize();
+
+                indexBuffer = new Uint16Array(Module.HEAPU8.buffer, indexPtr, indexSize);
+
+            }
+
+            function createScene() {
+
+                handGeom = createHand(vertData, indexBuffer); // create hand geom with attribs
+
+                refreshGeometry(handGeom);
+
+                window.addEventListener('resize', onWindowResize, false);
+
+                // stats
+                // stats = new Stats();
+                // container.appendChild(stats.domElement);
+
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.target.set(0, 0, 0);
+                controls.update();
+                // controls.addEventListener('change', draw);
+
+
+            }
+
+            function refreshGeometry(geom) {
+
+                shapeHeap.set(new Uint8Array(shapeParams.buffer));
+
+                // vert
+                Mano.calcHandVertices(vertBufferPtr, shapePPtr, posePPtr);
+                vertHeap = new Uint8Array(Module.HEAPU8.buffer, vertBufferPtr, vertBufferSize);
+                vertData = new Float32Array(vertHeap.buffer, vertHeap.byteOffset, numVertices * 3);
+
+                geom.attributes.position.array.set(vertData);
+                geom.attributes.position.needsUpdate = true;
+
+            }
+
+            /**
+             *
+             * @param vertData - initial hand template vertices
+             * @param indexBuffer
+             * @returns {BufferGeometry}
+             */
+            function createHand(vertData, indexBuffer) {
+                let geom = createHandGeom(vertData, indexBuffer);
+
+                let mesh = new THREE.Mesh(geom, material);
+                mesh.rotateY(-Math.PI / 2);
+                scene.add(mesh);
+
+                return geom;
+            }
+
+            function createHandGeom(vertData, indexBuffer) {
+                let geom = new THREE.BufferGeometry();
+
+                let posAttr = new THREE.BufferAttribute(vertData, 3);
+                posAttr.setDynamic(true); // gl.DYNAMIC_DRAW
+
+                geom.addAttribute("position", posAttr);
+                // geom.addAttribute("skinIndex", new THREE.BufferAttribute(weightIndexBuffer, 4));
+                // geom.addAttribute("skinWeight", new THREE.BufferAttribute(weightsBuffer, 4, true));
+
+                geom.setIndex(new THREE.BufferAttribute(indexBuffer, 1));
+
+                return geom;
+            }
+
+            function onWindowResize(event) {
+                SCREEN_WIDTH = window.innerWidth;
+                SCREEN_HEIGHT = window.innerHeight;
+                renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+                camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+                camera.updateProjectionMatrix();
+            }
+
+            function draw() {
+                requestAnimationFrame(draw);
+                refreshGeometry(handGeom);
+
+                if (manoParams.anim) {
+                    let dt = clock.getElapsedTime();
+
+                    let val = Math.sin(Math.PI + dt) * 10.0;
+                    manoParams.shapeBlendShape1 = val;
+                    shapeParams[0] = val;
+
+                }
+
+                renderer.clear();
+                renderer.render(scene, camera);
+                // stats.update();
+            }
+
+            function initGui() {
+
+                let ManoParams = function () {
+                    this.shapeBlendShape1 = 0;
+                    this.shapeBlendShape2 = 0;
+                    this.shapeBlendShape3 = 0;
+                    this.shapeBlendShape4 = 0;
+                    this.shapeBlendShape5 = 0;
+                    this.shapeBlendShape6 = 0;
+                    this.shapeBlendShape7 = 0;
+                    this.shapeBlendShape8 = 0;
+                    this.shapeBlendShape9 = 0;
+                    this.shapeBlendShape10 = 0;
+                    this.anim = true;
+                };
+
+
+                manoParams = new ManoParams();
+
+                gui = new dat.GUI();
+                let folder = gui.addFolder('Shape parameters');
+
+                folder.add(manoParams, 'shapeBlendShape1', -10, 10).name('Shape 1').step(0.01).onChange(function (value) {
+                    // doesn't get called via listen() - when setting variable
+                    shapeParams[0] = value;
+                    manoParams.anim = false;
+                }).listen();
+                folder.add(manoParams, 'shapeBlendShape2', -10, 10).name('Shape 2').step(0.01).onChange(function (value) {
+                    shapeParams[1] = value;
+                    manoParams.anim = false;
+                });
+                folder.add(manoParams, 'shapeBlendShape3', -10, 10).name('Shape 3').step(0.01).onChange(function (value) {
+                    shapeParams[2] = value;
+                    manoParams.anim = false;
+                });
+                folder.add(manoParams, 'shapeBlendShape4', -10, 10).name('Shape 4').step(0.01).onChange(function (value) {
+                    shapeParams[3] = value;
+                    manoParams.anim = false;
+                });
+                folder.add(manoParams, 'shapeBlendShape5', -10, 10).name('Shape 5').step(0.01).onChange(function (value) {
+                    shapeParams[4] = value;
+                    manoParams.anim = false;
+                });
+                folder.add(manoParams, 'shapeBlendShape6', -10, 10).name('Shape 6').step(0.01).onChange(function (value) {
+                    shapeParams[5] = value;
+                    manoParams.anim = false;
+                });
+                folder.add(manoParams, 'shapeBlendShape7', -10, 10).name('Shape 7').step(0.01).onChange(function (value) {
+                    shapeParams[6] = value;
+                    manoParams.anim = false;
+                });
+                folder.add(manoParams, 'shapeBlendShape8', -10, 10).name('Shape 8').step(0.01).onChange(function (value) {
+                    shapeParams[7] = value;
+                    manoParams.anim = false;
+                });
+                folder.add(manoParams, 'shapeBlendShape9', -10, 10).name('Shape 9').step(0.01).onChange(function (value) {
+                    shapeParams[8] = value;
+                    manoParams.anim = false;
+                });
+                folder.add(manoParams, 'shapeBlendShape10', -10, 10).name('Shape 10').step(0.01).onChange(function (value) {
+                    shapeParams[9] = value;
+                    manoParams.anim = false;
+                });
+
+                folder.add(manoParams, 'anim').name('Animate').listen();
+
+                if (SCREEN_WIDTH > 600) {
+                    folder.open();
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
