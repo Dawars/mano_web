@@ -2,7 +2,7 @@
 
 #### Web demo
 
-Interactive web demo for visualizing the **shape** parameters
+[Interactive web demo](https://dawars.me/mano/) for visualizing the **shape** parameters
 
 <img src="https://dawars.me/mano/images/banner.png" alt="Mano viewer" />
 
