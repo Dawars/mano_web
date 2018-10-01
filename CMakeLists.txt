@@ -18,4 +18,4 @@ add_executable(mano_cpp ${SOURCE_FILES})
 set_target_properties(mano_cpp PROPERTIES LINK_FLAGS " -s NO_EXIT_RUNTIME=1 -s WASM=1 -O3 -s MODULARIZE=1 -s EXPORT_NAME=ManoModule -s EXTRA_EXPORTED_RUNTIME_METHODS=[ccall,cwrap] --llvm-lto 3")
 
 
-file(INSTALL web/. DESTINATION .) # only runs when refreshing cmake
+file(INSTALL web/. DESTINATION .)
